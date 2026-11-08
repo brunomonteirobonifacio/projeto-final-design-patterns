@@ -1,4 +1,5 @@
-# projeto-final-design-patterns
+# Projeto Final de Design Patterns - Oficina Mecânica
 
 ## Stack
-* Java 25.0
+* **Linguagem:** Java 25
+* **Ferramenta de build:** Maven
