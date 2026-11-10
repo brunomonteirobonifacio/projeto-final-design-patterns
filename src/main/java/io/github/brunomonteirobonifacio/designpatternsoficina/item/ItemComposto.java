@@ -7,6 +7,8 @@ import java.util.List;
 
 public class ItemComposto implements Item {
 
+    private static final String RECUO = "    ";
+
     private final String descricao;
     private final List<Item> itens = new ArrayList<>();
 
@@ -46,12 +48,13 @@ public class ItemComposto implements Item {
     }
 
     @Override
-    public void exibir(int nivel) {
-        System.out.println(Moeda.recuo(nivel) + "+ " + descricao
-                + " (peças " + Moeda.formatar(getValorPecas())
-                + " | mão de obra " + Moeda.formatar(getValorMaoDeObra()) + ")");
+    public String formatar() {
+        List<String> linhas = new ArrayList<>();
+        linhas.add("+ " + descricao + " (peças " + Formatacao.moeda(getValorPecas())
+                + " | mão de obra " + Formatacao.moeda(getValorMaoDeObra()) + ")");
         for (Item item : itens) {
-            item.exibir(nivel + 1);
+            item.formatar().lines().forEach(linha -> linhas.add(RECUO + linha));
         }
+        return String.join(System.lineSeparator(), linhas);
     }
 }

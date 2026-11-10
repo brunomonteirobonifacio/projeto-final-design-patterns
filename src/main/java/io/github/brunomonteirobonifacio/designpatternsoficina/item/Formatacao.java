@@ -6,19 +6,19 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-public final class Moeda {
+final class Formatacao {
 
     private static final DecimalFormatSymbols SIMBOLOS = DecimalFormatSymbols.getInstance(Locale.of("pt", "BR"));
 
-    private Moeda() {
+    private Formatacao() {
     }
 
-    public static String formatar(BigDecimal valor) {
+    static String moeda(BigDecimal valor) {
         DecimalFormat formato = new DecimalFormat("#,##0.00", SIMBOLOS);
         return "R$ " + formato.format(valor.setScale(2, RoundingMode.HALF_UP));
     }
 
-    static String recuo(int nivel) {
-        return "    ".repeat(nivel);
+    static String horas(BigDecimal horas) {
+        return horas.stripTrailingZeros().toPlainString().replace('.', ',') + " h";
     }
 }

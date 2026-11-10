@@ -30,9 +30,8 @@ public class Peca implements Item {
     }
 
     @Override
-    public void exibir(int nivel) {
-        System.out.println(Moeda.recuo(nivel) + "- Peça: " + descricao
-                + " (" + quantidade + " x " + Moeda.formatar(precoUnitario) + ") = "
-                + Moeda.formatar(getValorPecas()));
+    public String formatar() {
+        return "- Peça: " + descricao + " (" + quantidade
+                + " x " + Formatacao.moeda(precoUnitario) + ") = " + Formatacao.moeda(getValorPecas());
     }
 }

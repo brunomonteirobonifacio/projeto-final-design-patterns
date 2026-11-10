@@ -30,10 +30,8 @@ public class MaoDeObra implements Item {
     }
 
     @Override
-    public void exibir(int nivel) {
-        String horasTexto = horas.stripTrailingZeros().toPlainString().replace('.', ',');
-        System.out.println(Moeda.recuo(nivel) + "- Mão de obra: " + descricao
-                + " (" + horasTexto + " h x " + Moeda.formatar(valorHora) + ") = "
-                + Moeda.formatar(getValorMaoDeObra()));
+    public String formatar() {
+        return "- Mão de obra: " + descricao + " (" + Formatacao.horas(horas)
+                + " x " + Formatacao.moeda(valorHora) + ") = " + Formatacao.moeda(getValorMaoDeObra());
     }
 }

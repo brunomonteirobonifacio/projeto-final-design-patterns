@@ -10,5 +10,5 @@ public interface Item {
 
     BigDecimal getValorMaoDeObra();
 
-    void exibir(int nivel);
+    String formatar();
 }
