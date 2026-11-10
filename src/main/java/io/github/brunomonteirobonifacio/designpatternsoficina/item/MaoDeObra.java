@@ -8,7 +8,7 @@ public class MaoDeObra implements Item {
     private final BigDecimal horas;
     private final BigDecimal valorHora;
 
-    public MaoDeObra(String descricao, BigDeHora) {
+    public MaoDeObra(String descricao, BigDecimal horas, BigDecimal valorHora) {
         this.descricao = descricao;
         this.horas = horas;
         this.valorHora = valorHora;
@@ -27,5 +27,13 @@ public class MaoDeObra implements Item {
     @Override
     public BigDecimal getValorMaoDeObra() {
         return horas.multiply(valorHora);
+    }
+
+    @Override
+    public void exibir(int nivel) {
+        String horasTexto = horas.stripTrailingZeros().toPlainString().replace('.', ',');
+        System.out.println(Moeda.recuo(nivel) + "- Mão de obra: " + descricao
+                + " (" + horasTexto + " h x " + Moeda.formatar(valorHora) + ") = "
+                + Moeda.formatar(getValorMaoDeObra()));
     }
 }

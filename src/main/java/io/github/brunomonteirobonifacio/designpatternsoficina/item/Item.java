@@ -9,4 +9,6 @@ public interface Item {
     BigDecimal getValorPecas();
 
     BigDecimal getValorMaoDeObra();
+
+    void exibir(int nivel);
 }

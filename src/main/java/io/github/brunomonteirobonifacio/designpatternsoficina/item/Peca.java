@@ -28,4 +28,11 @@ public class Peca implements Item {
     public BigDecimal getValorMaoDeObra() {
         return BigDecimal.ZERO;
     }
+
+    @Override
+    public void exibir(int nivel) {
+        System.out.println(Moeda.recuo(nivel) + "- Peça: " + descricao
+                + " (" + quantidade + " x " + Moeda.formatar(precoUnitario) + ") = "
+                + Moeda.formatar(getValorPecas()));
+    }
 }
