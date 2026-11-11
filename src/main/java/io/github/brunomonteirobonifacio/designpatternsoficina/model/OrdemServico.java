@@ -1,7 +1,7 @@
 package io.github.brunomonteirobonifacio.designpatternsoficina.model;
 
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.Item;
-import io.github.brunomonteirobonifacio.designpatternsoficina.item.PacoteItens;
+import io.github.brunomonteirobonifacio.designpatternsoficina.item.ItemComposto;
 import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.OrcamentoPadrao;
 import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.RegraOrcamento;
 
@@ -16,7 +16,8 @@ import java.util.List;
  * (nem o restante do fluxo da ordem).
  *
  * Os itens também são mantidos como uma estrutura Composite: a lista de itens
- * é o próprio {@link PacoteItens} raiz, que agrega itens simples e pacotes.
+ * é o próprio {@link ItemComposto} raiz, que agrega peças, serviços de mão de obra
+ * e outros pacotes.
  */
 public class OrdemServico {
 
@@ -24,7 +25,7 @@ public class OrdemServico {
 
     private final String numero;
     private final Veiculo veiculo;
-    private final PacoteItens itens = new PacoteItens(DESCRICAO_ITENS);
+    private final ItemComposto itens = new ItemComposto(DESCRICAO_ITENS);
     private RegraOrcamento regra = new OrcamentoPadrao();
 
     public OrdemServico(String numero, Veiculo veiculo) {

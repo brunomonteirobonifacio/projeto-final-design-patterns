@@ -8,17 +8,18 @@ orçamento conforme a regra de cobrança aplicada (padrão, frota ou garantia).
 
 | Integrante | Contribuição |
 |---|---|
-| Bruno Monteiro Bonifácio | Estrutura inicial do repositório (pom.xml, .gitignore, entrypoint `Main`) e organização do README |
-| Gianluca Andrade Silvestre | Parte 1 (branch `feature/strategy-orcamento`): entidades `Veiculo` e `OrdemServico`, folha e composto do Composite, regras de orçamento do Strategy e fluxo de console de ponta a ponta |
+| Bruno Monteiro Bonifácio | Estrutura inicial do repositório (pom.xml, .gitignore, entrypoint `Main`), organização do README e merge do PR #1 |
+| Gianluca Andrade Silvestre | Parte 1 (branch `feature/strategy-orcamento`): entidades `Veiculo` e `OrdemServico`, regras de orçamento do Strategy e fluxo de console de ponta a ponta |
 | Luís Filipe Damiani Colombo | *(a preencher)* |
-| Roger Balcevicz | Interface `Item` do Composite (branch `feature/composite`) |
+| Roger Balcevicz | Pattern Composite completo (interface `Item`, `Peca`, `MaoDeObra`, `ItemComposto` e `Formatacao` — branch `feature/composite`, PR #1) |
 
 ## Descrição do sistema
 
 A aplicação roda inteiramente em memória (sem banco de dados) e segue o fluxo:
 
 1. **Abrir ordem de serviço** — informa placa, marca, modelo e ano do veículo.
-2. **Adicionar itens** — itens simples (com valor de peças e de mão de obra, qualquer um podendo ser zero) ou o pacote de revisão completa, que agrupa vários itens.
+2. **Lançar itens** — peças (quantidade × preço unitário), serviços de mão de obra
+   (horas × valor/hora) e o pacote de revisão completa, que agrupa vários itens.
 3. **Escolher a regra de orçamento** — Padrão, Frota ou Garantia.
 4. **Exibir orçamento detalhado** — mostra a árvore de itens, os totais de peças e de mão de obra, a regra aplicada e o total final.
 
@@ -44,10 +45,11 @@ Alternativa: abra o projeto no IntelliJ IDEA e execute a classe `Main`.
 ```
 ----- MENU -----
 1 - Abrir ordem de serviço
-2 - Adicionar item simples (peça/serviço)
-3 - Adicionar pacote de revisão completa
-4 - Escolher regra de orçamento
-5 - Exibir orçamento detalhado
+2 - Adicionar peça
+3 - Adicionar serviço de mão de obra
+4 - Adicionar pacote de revisão completa
+5 - Escolher regra de orçamento
+6 - Exibir orçamento detalhado
 0 - Sair
 Opção: 1
 Placa do veículo: ABC-1234
@@ -57,15 +59,21 @@ Ano: 2020
 Ordem OS-001 aberta para o veículo Fiat Argo 2020 (placa ABC-1234).
 
 Opção: 2
-Descrição do item: Troca de pastilhas de freio
-Valor de peças: 180
-Valor de mão de obra: 120
-Item adicionado à ordem OS-001.
+Descrição da peça: Pastilha de freio dianteira
+Preço unitário: 180
+Quantidade: 2
+Peça adicionada à ordem OS-001.
 
 Opção: 3
-Pacote de revisão completa adicionado à ordem OS-001.
+Descrição do serviço: Reparo do freio
+Horas trabalhadas (ex.: 1.5): 1.5
+Valor por hora: 100
+Serviço adicionado à ordem OS-001.
 
 Opção: 4
+Pacote de revisão completa adicionado à ordem OS-001.
+
+Opção: 5
 Regras disponíveis:
 1 - Padrão: peças + mão de obra
 2 - Frota: 10% de desconto na mão de obra
@@ -73,21 +81,23 @@ Regras disponíveis:
 Regra: 2
 Regra definida: Frota (10% de desconto na mão de obra)
 
-Opção: 5
+Opção: 6
 ========= ORÇAMENTO =========
 Ordem: OS-001
 Veículo: Fiat Argo 2020 (placa ABC-1234)
 Itens:
-  - Troca de pastilhas de freio | peças: R$ 180,00 | mão de obra: R$ 120,00
-  [Pacote] Pacote — Revisão completa
-      - Troca de óleo e filtro | peças: R$ 145,00 | mão de obra: R$ 80,00
-      - Revisão do sistema de freios | peças: R$ 0,00 | mão de obra: R$ 90,00
-      - Verificação da suspensão | peças: R$ 0,00 | mão de obra: R$ 70,00
+  - Peça: Pastilha de freio dianteira (2 x R$ 180,00) = R$ 360,00
+  - Mão de obra: Reparo do freio (1,5 h x R$ 100,00) = R$ 150,00
+  + Pacote — Revisão completa (peças R$ 145,00 | mão de obra R$ 240,00)
+    - Peça: Óleo de motor e filtro (1 x R$ 145,00) = R$ 145,00
+    - Mão de obra: Troca de óleo e filtro (1 h x R$ 80,00) = R$ 80,00
+    - Mão de obra: Revisão do sistema de freios (1,5 h x R$ 60,00) = R$ 90,00
+    - Mão de obra: Verificação da suspensão (1 h x R$ 70,00) = R$ 70,00
 
-Total de peças: R$ 325,00
-Total de mão de obra: R$ 360,00
+Total de peças: R$ 505,00
+Total de mão de obra: R$ 390,00
 Regra aplicada: Frota (10% de desconto na mão de obra)
-TOTAL: R$ 649,00
+TOTAL: R$ 856,00
 =============================
 ```
 
@@ -110,15 +120,17 @@ TOTAL: R$ 649,00
 
 ### Composite — itens da ordem de serviço
 
-* **Problema resolvido:** uma ordem contém itens individuais (peça/serviço) e pacotes
+* **Problema resolvido:** uma ordem contém itens individuais (peças, serviços) e pacotes
   que agrupam outros itens (ex.: revisão completa). O padrão permite tratar item
   simples e pacote de forma uniforme, totalizando peças e mão de obra de forma
   recursiva sem que a ordem saiba a diferença entre eles.
 * **Classes envolvidas:**
-  * `item.Item` (componente) — `getDescricao()`, `getValorPecas()`, `getValorMaoDeObra()`.
-  * `item.ItemSimples` (folha) — um item com valores próprios.
-  * `item.PacoteItens` (composto) — agrupa filhos e soma seus valores
-    recursivamente.
+  * `item.Item` (componente) — `getDescricao()`, `getValorPecas()`, `getValorMaoDeObra()` e `formatar()`.
+  * `item.Peca` (folha) — quantidade × preço unitário, compõe o total de peças.
+  * `item.MaoDeObra` (folha) — horas × valor/hora, compõe o total de mão de obra.
+  * `item.ItemComposto` (composto) — agrupa filhos e soma seus valores
+    recursivamente; `formatar()` exibe a árvore de itens com recuo.
+  * `item.Formatacao` (auxiliar) — formatação de moeda (R$) e horas.
   * `model.OrdemServico` usa a raiz composta para agregar todos os itens da ordem.
 
 ## Declaração de uso de IA (Parte 1)

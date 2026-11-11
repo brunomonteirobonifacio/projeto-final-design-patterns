@@ -1,8 +1,9 @@
 package io.github.brunomonteirobonifacio.designpatternsoficina;
 
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.Item;
-import io.github.brunomonteirobonifacio.designpatternsoficina.item.ItemSimples;
-import io.github.brunomonteirobonifacio.designpatternsoficina.item.PacoteItens;
+import io.github.brunomonteirobonifacio.designpatternsoficina.item.ItemComposto;
+import io.github.brunomonteirobonifacio.designpatternsoficina.item.MaoDeObra;
+import io.github.brunomonteirobonifacio.designpatternsoficina.item.Peca;
 import io.github.brunomonteirobonifacio.designpatternsoficina.model.OrdemServico;
 import io.github.brunomonteirobonifacio.designpatternsoficina.model.Veiculo;
 import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.OrcamentoFrota;
@@ -12,13 +13,12 @@ import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.RegraOrca
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
 /**
  * Fluxo de ponta a ponta da oficina, via console:
- * abrir a ordem de serviço -> adicionar itens (simples ou pacotes) ->
+ * abrir a ordem de serviço -> lançar itens (peças, mão de obra e pacotes) ->
  * escolher a regra de orçamento (Strategy) -> exibir o orçamento detalhado.
  */
 public class Main {
@@ -37,10 +37,11 @@ public class Main {
             String opcao = lerTexto("Opção");
             switch (opcao) {
                 case "1" -> abrirOrdem();
-                case "2" -> adicionarItemSimples();
-                case "3" -> adicionarPacoteRevisao();
-                case "4" -> escolherRegra();
-                case "5" -> exibirOrcamento();
+                case "2" -> adicionarPeca();
+                case "3" -> adicionarMaoDeObra();
+                case "4" -> adicionarPacoteRevisao();
+                case "5" -> escolherRegra();
+                case "6" -> exibirOrcamento();
                 case "0" -> executando = false;
                 default -> System.out.println("Opção inválida, tente novamente.");
             }
@@ -52,10 +53,11 @@ public class Main {
         System.out.println();
         System.out.println("----- MENU -----");
         System.out.println("1 - Abrir ordem de serviço");
-        System.out.println("2 - Adicionar item simples (peça/serviço)");
-        System.out.println("3 - Adicionar pacote de revisão completa");
-        System.out.println("4 - Escolher regra de orçamento");
-        System.out.println("5 - Exibir orçamento detalhado");
+        System.out.println("2 - Adicionar peça");
+        System.out.println("3 - Adicionar serviço de mão de obra");
+        System.out.println("4 - Adicionar pacote de revisão completa");
+        System.out.println("5 - Escolher regra de orçamento");
+        System.out.println("6 - Exibir orçamento detalhado");
         System.out.println("0 - Sair");
     }
 
@@ -72,25 +74,37 @@ public class Main {
         System.out.println("Ordem " + numero + " aberta para o veículo " + ordem.getVeiculo() + ".");
     }
 
-    private void adicionarItemSimples() {
+    private void adicionarPeca() {
         if (exigirOrdemAberta()) {
             return;
         }
-        String descricao = lerTexto("Descrição do item");
-        BigDecimal valorPecas = lerValor("Valor de peças");
-        BigDecimal valorMaoDeObra = lerValor("Valor de mão de obra");
-        ordem.adicionarItem(new ItemSimples(descricao, valorPecas, valorMaoDeObra));
-        System.out.println("Item adicionado à ordem " + ordem.getNumero() + ".");
+        String descricao = lerTexto("Descrição da peça");
+        BigDecimal precoUnitario = lerValor("Preço unitário");
+        int quantidade = lerInteiro("Quantidade");
+        ordem.adicionarItem(new Peca(descricao, precoUnitario, quantidade));
+        System.out.println("Peça adicionada à ordem " + ordem.getNumero() + ".");
+    }
+
+    private void adicionarMaoDeObra() {
+        if (exigirOrdemAberta()) {
+            return;
+        }
+        String descricao = lerTexto("Descrição do serviço");
+        BigDecimal horas = lerValor("Horas trabalhadas (ex.: 1.5)");
+        BigDecimal valorHora = lerValor("Valor por hora");
+        ordem.adicionarItem(new MaoDeObra(descricao, horas, valorHora));
+        System.out.println("Serviço adicionado à ordem " + ordem.getNumero() + ".");
     }
 
     private void adicionarPacoteRevisao() {
         if (exigirOrdemAberta()) {
             return;
         }
-        PacoteItens pacote = new PacoteItens("Pacote — Revisão completa");
-        pacote.adicionar(new ItemSimples("Troca de óleo e filtro", new BigDecimal("145.00"), new BigDecimal("80.00")));
-        pacote.adicionar(new ItemSimples("Revisão do sistema de freios", BigDecimal.ZERO, new BigDecimal("90.00")));
-        pacote.adicionar(new ItemSimples("Verificação da suspensão", BigDecimal.ZERO, new BigDecimal("70.00")));
+        ItemComposto pacote = new ItemComposto("Pacote — Revisão completa");
+        pacote.adicionar(new Peca("Óleo de motor e filtro", new BigDecimal("145.00"), 1));
+        pacote.adicionar(new MaoDeObra("Troca de óleo e filtro", BigDecimal.ONE, new BigDecimal("80.00")));
+        pacote.adicionar(new MaoDeObra("Revisão do sistema de freios", new BigDecimal("1.5"), new BigDecimal("60.00")));
+        pacote.adicionar(new MaoDeObra("Verificação da suspensão", BigDecimal.ONE, new BigDecimal("70.00")));
         ordem.adicionarItem(pacote);
         System.out.println("Pacote de revisão completa adicionado à ordem " + ordem.getNumero() + ".");
     }
@@ -127,7 +141,7 @@ public class Main {
         System.out.println("Veículo: " + ordem.getVeiculo());
         System.out.println("Itens:");
         for (Item item : ordem.getItens()) {
-            imprimirItem(item, "  ");
+            System.out.println("  " + item.formatar());
         }
         System.out.println();
         System.out.println("Total de peças: " + moeda.format(ordem.getValorPecas()));
@@ -135,19 +149,6 @@ public class Main {
         System.out.println("Regra aplicada: " + ordem.getRegra().getDescricao());
         System.out.println("TOTAL: " + moeda.format(ordem.calcularTotal()));
         System.out.println("=============================");
-    }
-
-    private void imprimirItem(Item item, String recuo) {
-        if (item instanceof PacoteItens pacote) {
-            System.out.println(recuo + "[Pacote] " + item.getDescricao());
-            for (Item filho : pacote.getItens()) {
-                imprimirItem(filho, recuo + "    ");
-            }
-        } else {
-            System.out.println(recuo + "- " + item.getDescricao()
-                    + " | peças: " + moeda.format(item.getValorPecas())
-                    + " | mão de obra: " + moeda.format(item.getValorMaoDeObra()));
-        }
     }
 
     private boolean exigirOrdemAberta() {
