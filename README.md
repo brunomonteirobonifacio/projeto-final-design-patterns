@@ -1,6 +1,6 @@
 # Projeto Final de Design Patterns — Oficina Mecânica
 
-Sistema de console para uma oficina mecânica: abertura de ordens de serviço,
+Sistema de console para uma oficina mecânica: cadastro de veículos, abertura de ordens de serviço,
 lançamento de itens (peças, serviços avulsos e pacotes de revisão) e cálculo do
 orçamento conforme a regra de cobrança aplicada (padrão, frota ou garantia).
 
@@ -10,18 +10,21 @@ orçamento conforme a regra de cobrança aplicada (padrão, frota ou garantia).
 |---|---|
 | Bruno Monteiro Bonifácio | Estrutura inicial do repositório (pom.xml, .gitignore, entrypoint `Main`), organização do README e merge do PR #1 |
 | Gianluca Andrade Silvestre | Parte 1 (branch `feature/strategy-orcamento`): entidades `Veiculo` e `OrdemServico`, regras de orçamento do Strategy e fluxo de console de ponta a ponta |
-| Luís Filipe Damiani Colombo | *(a preencher)* |
+| Luís Filipe Damiani Colombo | Cadastro e listagem de veículos em memória (branch `feature/veiculos`): campo `dono` e validação/normalização de placa em `Veiculo`, classe `CadastroVeiculos` e opções de menu para cadastrar, listar e abrir a ordem a partir de um veículo cadastrado |
 | Roger Balcevicz | Pattern Composite completo (interface `Item`, `Peca`, `MaoDeObra`, `ItemComposto` e `Formatacao` — branch `feature/composite`, PR #1) |
 
 ## Descrição do sistema
 
 A aplicação roda inteiramente em memória (sem banco de dados) e segue o fluxo:
 
-1. **Abrir ordem de serviço** — informa placa, marca, modelo e ano do veículo.
-2. **Lançar itens** — peças (quantidade × preço unitário), serviços de mão de obra
+1. **Cadastrar veículo** — informa placa, marca, modelo, ano e dono. A placa é única
+   e aceita o padrão antigo (ABC1234) ou Mercosul (ABC1D23), com ou sem hífen.
+2. **Listar veículos** — mostra todos os veículos cadastrados em memória.
+3. **Abrir ordem de serviço** — escolhe, pela placa, um veículo já cadastrado.
+4. **Lançar itens** — peças (quantidade × preço unitário), serviços de mão de obra
    (horas × valor/hora) e o pacote de revisão completa, que agrupa vários itens.
-3. **Escolher a regra de orçamento** — Padrão, Frota ou Garantia.
-4. **Exibir orçamento detalhado** — mostra a árvore de itens, os totais de peças e de mão de obra, a regra aplicada e o total final.
+5. **Escolher a regra de orçamento** — Padrão, Frota ou Garantia.
+6. **Exibir orçamento detalhado** — mostra a árvore de itens, os totais de peças e de mão de obra, a regra aplicada e o total final.
 
 ## Tecnologias e pré-requisitos
 
@@ -44,36 +47,57 @@ Alternativa: abra o projeto no IntelliJ IDEA e execute a classe `Main`.
 
 ```
 ----- MENU -----
-1 - Abrir ordem de serviço
-2 - Adicionar peça
-3 - Adicionar serviço de mão de obra
-4 - Adicionar pacote de revisão completa
-5 - Escolher regra de orçamento
-6 - Exibir orçamento detalhado
+1 - Cadastrar veículo
+2 - Listar veículos
+3 - Abrir ordem de serviço
+4 - Adicionar peça
+5 - Adicionar serviço de mão de obra
+6 - Adicionar pacote de revisão completa
+7 - Escolher regra de orçamento
+8 - Exibir orçamento detalhado
 0 - Sair
 Opção: 1
-Placa do veículo: ABC-1234
+Placa (ABC1234 ou ABC1D23): ABC-1234
 Marca: Fiat
 Modelo: Argo
 Ano: 2020
-Ordem OS-001 aberta para o veículo Fiat Argo 2020 (placa ABC-1234).
+Dono: Maria Souza
+Veículo cadastrado: Fiat Argo 2020 (placa ABC1234) — dono: Maria Souza.
+
+Opção: 1
+Placa (ABC1234 ou ABC1D23): BRA2E19
+Marca: Toyota
+Modelo: Corolla
+Ano: 2023
+Dono: Carlos Lima
+Veículo cadastrado: Toyota Corolla 2023 (placa BRA2E19) — dono: Carlos Lima.
 
 Opção: 2
+Veículos cadastrados (2):
+PLACA    | MARCA/MODELO         | ANO  | DONO
+ABC1234  | Fiat Argo            | 2020 | Maria Souza
+BRA2E19  | Toyota Corolla       | 2023 | Carlos Lima
+
+Opção: 3
+Placa do veículo: abc1234
+Ordem OS-001 aberta para o veículo Fiat Argo 2020 (placa ABC1234) — dono: Maria Souza.
+
+Opção: 4
 Descrição da peça: Pastilha de freio dianteira
 Preço unitário: 180
 Quantidade: 2
 Peça adicionada à ordem OS-001.
 
-Opção: 3
+Opção: 5
 Descrição do serviço: Reparo do freio
 Horas trabalhadas (ex.: 1.5): 1.5
 Valor por hora: 100
 Serviço adicionado à ordem OS-001.
 
-Opção: 4
+Opção: 6
 Pacote de revisão completa adicionado à ordem OS-001.
 
-Opção: 5
+Opção: 7
 Regras disponíveis:
 1 - Padrão: peças + mão de obra
 2 - Frota: 10% de desconto na mão de obra
@@ -81,10 +105,10 @@ Regras disponíveis:
 Regra: 2
 Regra definida: Frota (10% de desconto na mão de obra)
 
-Opção: 6
+Opção: 8
 ========= ORÇAMENTO =========
 Ordem: OS-001
-Veículo: Fiat Argo 2020 (placa ABC-1234)
+Veículo: Fiat Argo 2020 (placa ABC1234) — dono: Maria Souza
 Itens:
   - Peça: Pastilha de freio dianteira (2 x R$ 180,00) = R$ 360,00
   - Mão de obra: Reparo do freio (1,5 h x R$ 100,00) = R$ 150,00
@@ -101,6 +125,12 @@ TOTAL: R$ 856,00
 =============================
 ```
 
+Situações tratadas no cadastro de veículos:
+
+* placa repetida → `Já existe um veículo cadastrado com a placa ABC1234.`
+* placa fora do padrão → `Placa inválida. Use o formato ABC1234 ou ABC1D23.`
+* abrir ordem sem veículos cadastrados ou com placa inexistente → mensagem orientando a usar as opções 1 ou 2.
+
 ## Patterns utilizados
 
 ### Strategy — regras de orçamento
@@ -116,7 +146,7 @@ TOTAL: R$ 856,00
   * `strategy.OrcamentoGarantia` — apenas a mão de obra.
   * Contexto: `model.OrdemServico` mantém a regra vigente (`definirRegra`) e delega
     o cálculo do total a ela (`calcularTotal`).
-  * Ponto de troca em tempo de execução: opção 4 do menu (`Main.escolherRegra`).
+  * Ponto de troca em tempo de execução: opção 7 do menu (`Main.escolherRegra`).
 
 ### Composite — itens da ordem de serviço
 
@@ -139,6 +169,10 @@ TOTAL: R$ 856,00
 * **Partes em que foi utilizada:** implementação inicial das classes dos patterns
   (Strategy e Composite), entidades `Veiculo` e `OrdemServico`, fluxo de console em
   `Main` e redação inicial deste README.
+* **Modelo utilizado (cadastro de veículos):** Claude Opus 5.5 (Anthropic), via claude.ai.
+* **Partes em que foi utilizada:** classe `CadastroVeiculos`, campo `dono` e validação de
+  placa em `Veiculo`, opções 1–3 do menu em `Main` e atualização deste README
+  (fluxo, exemplo de uso e contribuição do Luís).
 * Todo o código gerado com auxílio de IA foi **revisado e ajustado pelos integrantes**.
 
 *(A Parte 2 deve ser desenvolvida sem uso de IA; a Parte 3 é autoral.)*

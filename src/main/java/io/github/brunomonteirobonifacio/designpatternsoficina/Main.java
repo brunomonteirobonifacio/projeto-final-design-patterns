@@ -4,6 +4,7 @@ import io.github.brunomonteirobonifacio.designpatternsoficina.item.Item;
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.ItemComposto;
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.MaoDeObra;
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.Peca;
+import io.github.brunomonteirobonifacio.designpatternsoficina.model.CadastroVeiculos;
 import io.github.brunomonteirobonifacio.designpatternsoficina.model.OrdemServico;
 import io.github.brunomonteirobonifacio.designpatternsoficina.model.Veiculo;
 import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.OrcamentoFrota;
@@ -13,18 +14,24 @@ import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.RegraOrca
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Scanner;
 
 /**
  * Fluxo de ponta a ponta da oficina, via console:
- * abrir a ordem de serviço -> lançar itens (peças, mão de obra e pacotes) ->
+ * cadastrar o veículo -> abrir a ordem de serviço para um veículo cadastrado -> lançar itens (peças, mão de obra e pacotes) ->
  * escolher a regra de orçamento (Strategy) -> exibir o orçamento detalhado.
  */
 public class Main {
 
+    private static final int LARGURA_MARCA_MODELO = 20;
+    private static final String FORMATO_LINHA_VEICULO = "%-8s | %-20s | %-4d | %s%n";
+
     private final Scanner entrada = new Scanner(System.in);
     private final NumberFormat moeda = NumberFormat.getCurrencyInstance(Locale.of("pt", "BR"));
+    private final CadastroVeiculos veiculos = new CadastroVeiculos();
 
     private OrdemServico ordem;
     private int proximoNumero = 1;
@@ -36,12 +43,14 @@ public class Main {
             exibirMenu();
             String opcao = lerTexto("Opção");
             switch (opcao) {
-                case "1" -> abrirOrdem();
-                case "2" -> adicionarPeca();
-                case "3" -> adicionarMaoDeObra();
-                case "4" -> adicionarPacoteRevisao();
-                case "5" -> escolherRegra();
-                case "6" -> exibirOrcamento();
+                case "1" -> cadastrarVeiculo();
+                case "2" -> listarVeiculos();
+                case "3" -> abrirOrdem();
+                case "4" -> adicionarPeca();
+                case "5" -> adicionarMaoDeObra();
+                case "6" -> adicionarPacoteRevisao();
+                case "7" -> escolherRegra();
+                case "8" -> exibirOrcamento();
                 case "0" -> executando = false;
                 default -> System.out.println("Opção inválida, tente novamente.");
             }
@@ -52,25 +61,69 @@ public class Main {
     private void exibirMenu() {
         System.out.println();
         System.out.println("----- MENU -----");
-        System.out.println("1 - Abrir ordem de serviço");
-        System.out.println("2 - Adicionar peça");
-        System.out.println("3 - Adicionar serviço de mão de obra");
-        System.out.println("4 - Adicionar pacote de revisão completa");
-        System.out.println("5 - Escolher regra de orçamento");
-        System.out.println("6 - Exibir orçamento detalhado");
+        System.out.println("1 - Cadastrar veículo");
+        System.out.println("2 - Listar veículos");
+        System.out.println("3 - Abrir ordem de serviço");
+        System.out.println("4 - Adicionar peça");
+        System.out.println("5 - Adicionar serviço de mão de obra");
+        System.out.println("6 - Adicionar pacote de revisão completa");
+        System.out.println("7 - Escolher regra de orçamento");
+        System.out.println("8 - Exibir orçamento detalhado");
         System.out.println("0 - Sair");
     }
 
-    private void abrirOrdem() {
-        if (ordem != null) {
-            System.out.println("Atenção: já existia uma ordem aberta, ela foi substituída.");
+    private void cadastrarVeiculo() {
+        String placa = lerTexto("Placa (ABC1234 ou ABC1D23)");
+        try {
+            veiculos.verificarPlacaDisponivel(placa);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Não foi possível cadastrar: " + e.getMessage());
+            return;
         }
-        String placa = lerTexto("Placa do veículo");
+
         String marca = lerTexto("Marca");
         String modelo = lerTexto("Modelo");
         int ano = lerInteiro("Ano");
+        String dono = lerTexto("Dono");
+        try {
+            Veiculo veiculo = new Veiculo(placa, marca, modelo, ano, dono);
+            veiculos.cadastrar(veiculo);
+            System.out.println("Veículo cadastrado: " + veiculo + ".");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Não foi possível cadastrar: " + e.getMessage());
+        }
+    }
+
+    private void listarVeiculos() {
+        List<Veiculo> veiculosCadastrados = veiculos.listar();
+        if (veiculosCadastrados.isEmpty()) {
+            System.out.println("Nenhum veículo cadastrado. Use a opção 1.");
+            return;
+        }
+        System.out.println("Veículos cadastrados (" + veiculosCadastrados.size() + "):");
+        System.out.printf("%-8s | %-20s | %-4s | %s%n", "PLACA", "MARCA/MODELO", "ANO", "DONO");
+        for (Veiculo veiculo : veiculosCadastrados) {
+            String marcaModelo = limitarTexto(veiculo.marca() + " " + veiculo.modelo(), LARGURA_MARCA_MODELO);
+            System.out.printf(FORMATO_LINHA_VEICULO, veiculo.placa(), marcaModelo, veiculo.ano(), veiculo.dono());
+        }
+    }
+
+    private void abrirOrdem() {
+        if (veiculos.estaVazio()) {
+            System.out.println("Nenhum veículo cadastrado. Cadastre o veículo na opção 1 antes de abrir a ordem.");
+            return;
+        }
+        String placa = lerTexto("Placa do veículo");
+        Optional<Veiculo> veiculoEncontrado = veiculos.buscarPorPlaca(placa);
+        if (veiculoEncontrado.isEmpty()) {
+            System.out.println("Veículo não encontrado. Confira a placa na opção 2 (listar veículos).");
+            return;
+        }
+        if (ordem != null) {
+            System.out.println("Atenção: já existia uma ordem aberta, ela foi substituída.");
+        }
         String numero = "OS-%03d".formatted(proximoNumero++);
-        ordem = new OrdemServico(numero, new Veiculo(placa, marca, modelo, ano));
+        ordem = new OrdemServico(numero, veiculoEncontrado.get());
         System.out.println("Ordem " + numero + " aberta para o veículo " + ordem.getVeiculo() + ".");
     }
 
@@ -151,9 +204,16 @@ public class Main {
         System.out.println("=============================");
     }
 
+    private static String limitarTexto(String texto, int tamanhoMaximo) {
+        if (texto.length() <= tamanhoMaximo) {
+            return texto;
+        }
+        return texto.substring(0, tamanhoMaximo - 3) + "...";
+    }
+
     private boolean exigirOrdemAberta() {
         if (ordem == null) {
-            System.out.println("Nenhuma ordem aberta. Use a opção 1 antes.");
+            System.out.println("Nenhuma ordem aberta. Use a opção 3 antes.");
             return true;
         }
         return false;
