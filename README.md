@@ -127,8 +127,10 @@ TOTAL: R$ 856,00
 
 Situações tratadas no cadastro de veículos:
 
-* placa repetida → `Já existe um veículo cadastrado com a placa ABC1234.`
-* placa fora do padrão → `Placa inválida. Use o formato ABC1234 ou ABC1D23.`
+* placa fora do padrão → `Não foi possível cadastrar: Placa inválida. Use o formato ABC1234 ou ABC1D23.`
+* placa repetida → `Não foi possível cadastrar: Já existe um veículo cadastrado com a placa ABC1234.`
+* a placa é conferida logo depois de digitada, antes de pedir os demais campos.
+* ano fora do intervalo (1900 até o ano seguinte ao atual) ou campos em branco também são recusados.
 * abrir ordem sem veículos cadastrados ou com placa inexistente → mensagem orientando a usar as opções 1 ou 2.
 
 ## Patterns utilizados
