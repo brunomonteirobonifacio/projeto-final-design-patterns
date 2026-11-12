@@ -14,6 +14,7 @@ import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.RegraOrca
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -33,6 +34,7 @@ public class Main {
     private final NumberFormat moeda = NumberFormat.getCurrencyInstance(Locale.of("pt", "BR"));
     private final CadastroVeiculos veiculos = new CadastroVeiculos();
 
+    private final List<OrdemServico> ordens = new ArrayList<>();
     private OrdemServico ordem;
     private int proximoNumero = 1;
 
@@ -51,6 +53,8 @@ public class Main {
                 case "6" -> adicionarPacoteRevisao();
                 case "7" -> escolherRegra();
                 case "8" -> exibirOrcamento();
+                case "9" -> listarOrdens();
+                case "10" -> selecionarOrdem();
                 case "0" -> executando = false;
                 default -> System.out.println("Opção inválida, tente novamente.");
             }
@@ -69,7 +73,12 @@ public class Main {
         System.out.println("6 - Adicionar pacote de revisão completa");
         System.out.println("7 - Escolher regra de orçamento");
         System.out.println("8 - Exibir orçamento detalhado");
+        System.out.println("9 - Listar ordens de serviço");
+        System.out.println("10 - Selecionar ordem atual");
         System.out.println("0 - Sair");
+        if (ordem != null) {
+            System.out.println("Ordem atual: " + ordem.getNumero());
+        }
     }
 
     private void cadastrarVeiculo() {
@@ -119,12 +128,42 @@ public class Main {
             System.out.println("Veículo não encontrado. Confira a placa na opção 2 (listar veículos).");
             return;
         }
-        if (ordem != null) {
-            System.out.println("Atenção: já existia uma ordem aberta, ela foi substituída.");
-        }
         String numero = "OS-%03d".formatted(proximoNumero++);
         ordem = new OrdemServico(numero, veiculoEncontrado.get());
-        System.out.println("Ordem " + numero + " aberta para o veículo " + ordem.getVeiculo() + ".");
+        ordens.add(ordem);
+        System.out.println("Ordem " + numero + " aberta para o veículo " + ordem.getVeiculo()
+                + ". Ela agora é a ordem atual.");
+    }
+
+    private void listarOrdens() {
+        if (ordens.isEmpty()) {
+            System.out.println("Nenhuma ordem de serviço aberta.");
+            return;
+        }
+        System.out.println("Ordens de serviço:");
+        for (OrdemServico os : ordens) {
+            String regra = os.temRegra() ? os.getRegra().getDescricao() : "sem regra escolhida";
+            String total = os.temRegra() ? moeda.format(os.calcularTotal()) : "-";
+            String atual = os == ordem ? " (atual)" : "";
+            System.out.println("  " + os.getNumero() + atual + " | " + os.getVeiculo()
+                    + " | " + regra + " | total: " + total);
+        }
+    }
+
+    private void selecionarOrdem() {
+        if (ordens.isEmpty()) {
+            System.out.println("Nenhuma ordem de serviço aberta. Use a opção 3 antes.");
+            return;
+        }
+        String numero = lerTexto("Número da ordem (ex.: OS-001)");
+        for (OrdemServico os : ordens) {
+            if (os.getNumero().equalsIgnoreCase(numero)) {
+                ordem = os;
+                System.out.println("Ordem atual: " + ordem.getNumero() + ".");
+                return;
+            }
+        }
+        System.out.println("Ordem " + numero + " não encontrada.");
     }
 
     private void adicionarPeca() {
@@ -194,13 +233,17 @@ public class Main {
         System.out.println("Veículo: " + ordem.getVeiculo());
         System.out.println("Itens:");
         for (Item item : ordem.getItens()) {
-            System.out.println("  " + item.formatar());
+            item.formatar().lines().forEach(linha -> System.out.println("  " + linha));
         }
         System.out.println();
         System.out.println("Total de peças: " + moeda.format(ordem.getValorPecas()));
         System.out.println("Total de mão de obra: " + moeda.format(ordem.getValorMaoDeObra()));
-        System.out.println("Regra aplicada: " + ordem.getRegra().getDescricao());
-        System.out.println("TOTAL: " + moeda.format(ordem.calcularTotal()));
+        if (ordem.temRegra()) {
+            System.out.println("Regra aplicada: " + ordem.getRegra().getDescricao());
+            System.out.println("TOTAL: " + moeda.format(ordem.calcularTotal()));
+        } else {
+            System.out.println("Nenhuma regra de orçamento escolhida. Use a opção 7 para calcular o total.");
+        }
         System.out.println("=============================");
     }
 
@@ -220,14 +263,24 @@ public class Main {
     }
 
     private String lerTexto(String rotulo) {
-        System.out.print(rotulo + ": ");
-        return entrada.nextLine().trim();
+        while (true) {
+            System.out.print(rotulo + ": ");
+            String texto = entrada.nextLine().trim();
+            if (!texto.isEmpty()) {
+                return texto;
+            }
+            System.out.println("Este campo não pode ficar vazio.");
+        }
     }
 
     private int lerInteiro(String rotulo) {
         while (true) {
             try {
-                return Integer.parseInt(lerTexto(rotulo));
+                int valor = Integer.parseInt(lerTexto(rotulo));
+                if (valor > 0) {
+                    return valor;
+                }
+                System.out.println("O valor deve ser maior que zero.");
             } catch (NumberFormatException e) {
                 System.out.println("Valor inválido, informe um número inteiro.");
             }
@@ -237,7 +290,11 @@ public class Main {
     private BigDecimal lerValor(String rotulo) {
         while (true) {
             try {
-                return new BigDecimal(lerTexto(rotulo).replace(',', '.'));
+                BigDecimal valor = new BigDecimal(lerTexto(rotulo).replace(',', '.'));
+                if (valor.signum() > 0) {
+                    return valor;
+                }
+                System.out.println("O valor deve ser maior que zero.");
             } catch (NumberFormatException e) {
                 System.out.println("Valor inválido, informe um número (ex.: 150 ou 150.50).");
             }
