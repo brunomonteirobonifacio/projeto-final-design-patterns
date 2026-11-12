@@ -178,8 +178,8 @@ Situações tratadas no cadastro de veículos:
 ## Declaração de uso de IA (Parte 1)
 
 * **Modelo utilizado:** GLM (Z.ai), via agente de programação OpenCode.
-* **Partes em que foi utilizada:** implementação inicial das classes dos patterns
-  (Strategy e Composite), entidades `Veiculo` e `OrdemServico`, fluxo de console em
+* **Partes em que foi utilizada:** implementação inicial das classes do pattern
+  Strategy, entidades `Veiculo` e `OrdemServico`, fluxo de console em
   `Main` e redação inicial deste README.
 * **Modelo utilizado (cadastro de veículos):** Claude Opus 5.5 (Anthropic), via claude.ai.
 * **Partes em que foi utilizada:** classe `CadastroVeiculos`, campo `dono` e validação de
