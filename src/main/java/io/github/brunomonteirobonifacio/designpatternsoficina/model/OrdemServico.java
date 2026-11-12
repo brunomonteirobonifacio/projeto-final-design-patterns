@@ -2,7 +2,6 @@ package io.github.brunomonteirobonifacio.designpatternsoficina.model;
 
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.Item;
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.ItemComposto;
-import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.OrcamentoPadrao;
 import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.RegraOrcamento;
 
 import java.math.BigDecimal;
@@ -26,7 +25,7 @@ public class OrdemServico {
     private final String numero;
     private final Veiculo veiculo;
     private final ItemComposto itens = new ItemComposto(DESCRICAO_ITENS);
-    private RegraOrcamento regra = new OrcamentoPadrao();
+    private RegraOrcamento regra;
 
     public OrdemServico(String numero, Veiculo veiculo) {
         this.numero = numero;
@@ -52,7 +51,14 @@ public class OrdemServico {
         return itens.getValorMaoDeObra();
     }
 
+    public boolean temRegra() {
+        return regra != null;
+    }
+
     public BigDecimal calcularTotal() {
+        if (regra == null) {
+            throw new IllegalStateException("Escolha uma regra de orçamento antes de calcular o total.");
+        }
         return regra.calcular(getValorPecas(), getValorMaoDeObra());
     }
 
