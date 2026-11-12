@@ -92,7 +92,7 @@ public class Main {
 
         String marca = lerTexto("Marca");
         String modelo = lerTexto("Modelo");
-        int ano = lerInteiro("Ano");
+        int ano = lerAno();
         String dono = lerTexto("Dono");
         try {
             Veiculo veiculo = new Veiculo(placa, marca, modelo, ano, dono);
@@ -283,6 +283,18 @@ public class Main {
                 System.out.println("O valor deve ser maior que zero.");
             } catch (NumberFormatException e) {
                 System.out.println("Valor inválido, informe um número inteiro.");
+            }
+        }
+    }
+
+    private int lerAno() {
+        while (true) {
+            int ano = lerInteiro("Ano");
+            try {
+                Veiculo.validarAno(ano);
+                return ano;
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
             }
         }
     }

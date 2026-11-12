@@ -13,10 +13,7 @@ public record Veiculo(String placa, String marca, String modelo, int ano, String
         marca = obrigatorio(marca, "marca");
         modelo = obrigatorio(modelo, "modelo");
         dono = obrigatorio(dono, "dono");
-        int anoMaximo = Year.now().getValue() + 1;
-        if (ano < 1900 || ano > anoMaximo) {
-            throw new IllegalArgumentException("Ano inválido. Informe um ano entre 1900 e " + anoMaximo + ".");
-        }
+        validarAno(ano);
     }
 
     public static String normalizarPlaca(String placa) {
@@ -32,6 +29,13 @@ public record Veiculo(String placa, String marca, String modelo, int ano, String
             throw new IllegalArgumentException("Placa inválida. Use o formato ABC1234 ou ABC1D23.");
         }
         return placaNormalizada;
+    }
+
+    public static void validarAno(int ano) {
+        int anoMaximo = Year.now().getValue() + 1;
+        if (ano < 1900 || ano > anoMaximo) {
+            throw new IllegalArgumentException("Ano inválido. Informe um ano entre 1900 e " + anoMaximo + ".");
+        }
     }
 
     private static String obrigatorio(String valor, String campo) {

@@ -11,7 +11,7 @@ orçamento conforme a regra de cobrança aplicada (padrão, frota ou garantia).
 | Bruno Monteiro Bonifácio | Estrutura inicial do repositório (pom.xml, .gitignore, entrypoint `Main`), organização do README e merge do PR #1 |
 | Gianluca Andrade Silvestre | Parte 1 (branch `feature/strategy-orcamento`): entidades `Veiculo` e `OrdemServico`, regras de orçamento do Strategy e fluxo de console de ponta a ponta |
 | Luís Filipe Damiani Colombo | Cadastro e listagem de veículos em memória (branch `feature/veiculos`): campo `dono` e validação/normalização de placa em `Veiculo`, classe `CadastroVeiculos` e opções de menu para cadastrar, listar e abrir a ordem a partir de um veículo cadastrado |
-| Roger Balcevicz | Pattern Composite completo (interface `Item`, `Peca`, `MaoDeObra`, `ItemComposto` e `Formatacao` — branch `feature/composite`, PR #1) |
+| Roger Balcevicz | Pattern Composite completo (interface `Item`, `Peca`, `MaoDeObra`, `ItemComposto` e `Formatacao` — branch `feature/composite`, PR #1); listagem e seleção de ordens de serviço, validação de entradas e remoção da regra padrão da `OrdemServico` (branch `feature/ordem-servico`, PR #3) |
 
 ## Descrição do sistema
 
@@ -23,8 +23,12 @@ A aplicação roda inteiramente em memória (sem banco de dados) e segue o fluxo
 3. **Abrir ordem de serviço** — escolhe, pela placa, um veículo já cadastrado.
 4. **Lançar itens** — peças (quantidade × preço unitário), serviços de mão de obra
    (horas × valor/hora) e o pacote de revisão completa, que agrupa vários itens.
-5. **Escolher a regra de orçamento** — Padrão, Frota ou Garantia.
+5. **Escolher a regra de orçamento** — Padrão, Frota ou Garantia. A ordem não tem regra
+   padrão: o total só é calculado depois que uma regra é escolhida.
 6. **Exibir orçamento detalhado** — mostra a árvore de itens, os totais de peças e de mão de obra, a regra aplicada e o total final.
+7. **Listar ordens de serviço** — mostra todas as ordens abertas, com veículo, regra e total.
+8. **Selecionar ordem atual** — escolhe, pelo número (ex.: OS-001), em qual ordem os
+   próximos itens e regras serão lançados.
 
 ## Tecnologias e pré-requisitos
 
@@ -55,6 +59,8 @@ Alternativa: abra o projeto no IntelliJ IDEA e execute a classe `Main`.
 6 - Adicionar pacote de revisão completa
 7 - Escolher regra de orçamento
 8 - Exibir orçamento detalhado
+9 - Listar ordens de serviço
+10 - Selecionar ordem atual
 0 - Sair
 Opção: 1
 Placa (ABC1234 ou ABC1D23): ABC-1234
@@ -80,7 +86,7 @@ BRA2E19  | Toyota Corolla       | 2023 | Carlos Lima
 
 Opção: 3
 Placa do veículo: abc1234
-Ordem OS-001 aberta para o veículo Fiat Argo 2020 (placa ABC1234) — dono: Maria Souza.
+Ordem OS-001 aberta para o veículo Fiat Argo 2020 (placa ABC1234) — dono: Maria Souza. Ela agora é a ordem atual.
 
 Opção: 4
 Descrição da peça: Pastilha de freio dianteira
@@ -123,6 +129,10 @@ Total de mão de obra: R$ 390,00
 Regra aplicada: Frota (10% de desconto na mão de obra)
 TOTAL: R$ 856,00
 =============================
+
+Opção: 9
+Ordens de serviço:
+  OS-001 (atual) | Fiat Argo 2020 (placa ABC1234) — dono: Maria Souza | Frota (10% de desconto na mão de obra) | total: R$ 856,00
 ```
 
 Situações tratadas no cadastro de veículos:
@@ -130,7 +140,7 @@ Situações tratadas no cadastro de veículos:
 * placa fora do padrão → `Não foi possível cadastrar: Placa inválida. Use o formato ABC1234 ou ABC1D23.`
 * placa repetida → `Não foi possível cadastrar: Já existe um veículo cadastrado com a placa ABC1234.`
 * a placa é conferida logo depois de digitada, antes de pedir os demais campos.
-* ano fora do intervalo (1900 até o ano seguinte ao atual) ou campos em branco também são recusados.
+* ano fora do intervalo (1900 até o ano seguinte ao atual) é avisado logo depois de digitado e pedido de novo; campos vazios também são pedidos de novo.
 * abrir ordem sem veículos cadastrados ou com placa inexistente → mensagem orientando a usar as opções 1 ou 2.
 
 ## Patterns utilizados
@@ -173,8 +183,8 @@ Situações tratadas no cadastro de veículos:
   `Main` e redação inicial deste README.
 * **Modelo utilizado (cadastro de veículos):** Claude Opus 5.5 (Anthropic), via claude.ai.
 * **Partes em que foi utilizada:** classe `CadastroVeiculos`, campo `dono` e validação de
-  placa em `Veiculo`, opções 1–3 do menu em `Main` e atualização deste README
-  (fluxo, exemplo de uso e contribuição do Luís).
+  placa em `Veiculo`, opções 1–3 do menu em `Main`, resolução do conflito do `Main` com a
+  branch `feature/ordem-servico` e atualização deste README (fluxo, exemplo de uso e contribuições).
 * Todo o código gerado com auxílio de IA foi **revisado e ajustado pelos integrantes**.
 
 *(A Parte 2 deve ser desenvolvida sem uso de IA; a Parte 3 é autoral.)*
