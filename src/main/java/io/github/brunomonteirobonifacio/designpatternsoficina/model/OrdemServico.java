@@ -1,10 +1,11 @@
 package io.github.brunomonteirobonifacio.designpatternsoficina.model;
 
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.Item;
-import io.github.brunomonteirobonifacio.designpatternsoficina.item.ItemComposto;
 import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.RegraOrcamento;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,17 +15,15 @@ import java.util.List;
  * o cálculo do orçamento, permitindo trocar a regra de cobrança sem alterar esta classe
  * (nem o restante do fluxo da ordem).
  *
- * Os itens também são mantidos como uma estrutura Composite: a lista de itens
- * é o próprio {@link ItemComposto} raiz, que agrega peças, serviços de mão de obra
- * e outros pacotes.
+ * Os itens são mantidos em uma lista de {@link Item}, a interface do composite:
+ * peças, serviços de mão de obra e pacotes são tratados de forma uniforme, sem que
+ * esta classe precise conhecer as classes concretas que os implementam.
  */
 public class OrdemServico {
 
-    private static final String DESCRICAO_ITENS = "Itens da ordem de serviço";
-
     private final String numero;
     private final Veiculo veiculo;
-    private final ItemComposto itens = new ItemComposto(DESCRICAO_ITENS);
+    private final List<Item> itens = new ArrayList<>();
     private RegraOrcamento regra;
 
     public OrdemServico(String numero, Veiculo veiculo) {
@@ -33,7 +32,7 @@ public class OrdemServico {
     }
 
     public void adicionarItem(Item item) {
-        itens.adicionar(item);
+        itens.add(item);
     }
 
     public void definirRegra(RegraOrcamento regra) {
@@ -44,11 +43,19 @@ public class OrdemServico {
     }
 
     public BigDecimal getValorPecas() {
-        return itens.getValorPecas();
+        BigDecimal total = BigDecimal.ZERO;
+        for (Item item : itens) {
+            total = total.add(item.getValorPecas());
+        }
+        return total;
     }
 
     public BigDecimal getValorMaoDeObra() {
-        return itens.getValorMaoDeObra();
+        BigDecimal total = BigDecimal.ZERO;
+        for (Item item : itens) {
+            total = total.add(item.getValorMaoDeObra());
+        }
+        return total;
     }
 
     public boolean temRegra() {
@@ -75,6 +82,6 @@ public class OrdemServico {
     }
 
     public List<Item> getItens() {
-        return itens.getItens();
+        return Collections.unmodifiableList(itens);
     }
 }

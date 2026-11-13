@@ -8,7 +8,7 @@ orçamento conforme a regra de cobrança aplicada (padrão, frota ou garantia).
 
 | Integrante | Contribuição |
 |---|---|
-| Bruno Monteiro Bonifácio | Estrutura inicial do repositório (pom.xml, .gitignore, entrypoint `Main`), organização do README e merge do PR #1 |
+| Bruno Monteiro Bonifácio | Estrutura inicial do repositório (pom.xml, .gitignore, entrypoint `Main`), organização do README e revisão de PRs |
 | Gianluca Andrade Silvestre | Parte 1 (branch `feature/strategy-orcamento`): entidades `Veiculo` e `OrdemServico`, regras de orçamento do Strategy e fluxo de console de ponta a ponta |
 | Luís Filipe Damiani Colombo | Cadastro e listagem de veículos em memória (branch `feature/veiculos`): campo `dono` e validação/normalização de placa em `Veiculo`, classe `CadastroVeiculos` e opções de menu para cadastrar, listar e abrir a ordem a partir de um veículo cadastrado |
 | Roger Balcevicz | Pattern Composite completo (interface `Item`, `Peca`, `MaoDeObra`, `ItemComposto` e `Formatacao` — branch `feature/composite`, PR #1); listagem e seleção de ordens de serviço, validação de entradas e remoção da regra padrão da `OrdemServico` (branch `feature/ordem-servico`, PR #3) |
@@ -173,7 +173,8 @@ Situações tratadas no cadastro de veículos:
   * `item.ItemComposto` (composto) — agrupa filhos e soma seus valores
     recursivamente; `formatar()` exibe a árvore de itens com recuo.
   * `item.Formatacao` (auxiliar) — formatação de moeda (R$) e horas.
-  * `model.OrdemServico` usa a raiz composta para agregar todos os itens da ordem.
+  * `model.OrdemServico` mantém os itens numa `List<Item>` e os manipula sempre
+    pela interface, como cliente do composite.
 
 ## Declaração de uso de IA (Parte 1)
 
