@@ -23,7 +23,7 @@ import java.util.Scanner;
 /**
  * Fluxo de ponta a ponta da oficina, via console:
  * cadastrar o veículo -> abrir a ordem de serviço para um veículo cadastrado -> lançar itens (peças, mão de obra e pacotes) ->
- * escolher a regra de orçamento (Strategy) -> exibir o orçamento detalhado.
+ * escolher a regra de orçamento (Strategy) -> exibir o orçamento detalhado -> comparar o total nas três regras sem trocar a vigente.
  */
 public class Main {
 
@@ -55,6 +55,7 @@ public class Main {
                 case "8" -> exibirOrcamento();
                 case "9" -> listarOrdens();
                 case "10" -> selecionarOrdem();
+                case "11" -> compararRegras();
                 case "0" -> executando = false;
                 default -> System.out.println("Opção inválida, tente novamente.");
             }
@@ -75,6 +76,7 @@ public class Main {
         System.out.println("8 - Exibir orçamento detalhado");
         System.out.println("9 - Listar ordens de serviço");
         System.out.println("10 - Selecionar ordem atual");
+        System.out.println("11 - Comparar regras de orçamento");
         System.out.println("0 - Sair");
         if (ordem != null) {
             System.out.println("Ordem atual: " + ordem.getNumero());
@@ -193,10 +195,22 @@ public class Main {
             return;
         }
         ItemComposto pacote = new ItemComposto("Pacote — Revisão completa");
-        pacote.adicionar(new Peca("Óleo de motor e filtro", new BigDecimal("145.00"), 1));
-        pacote.adicionar(new MaoDeObra("Troca de óleo e filtro", BigDecimal.ONE, new BigDecimal("80.00")));
-        pacote.adicionar(new MaoDeObra("Revisão do sistema de freios", new BigDecimal("1.5"), new BigDecimal("60.00")));
-        pacote.adicionar(new MaoDeObra("Verificação da suspensão", BigDecimal.ONE, new BigDecimal("70.00")));
+
+        ItemComposto trocaDeOleo = new ItemComposto("Troca de óleo");
+        trocaDeOleo.adicionar(new Peca("Óleo de motor", new BigDecimal("45.00"), 4));
+        trocaDeOleo.adicionar(new Peca("Filtro de óleo", new BigDecimal("35.00"), 1));
+        trocaDeOleo.adicionar(new MaoDeObra("Troca de óleo", new BigDecimal("0.5"), new BigDecimal("120.00")));
+        pacote.adicionar(trocaDeOleo);
+
+        ItemComposto freios = new ItemComposto("Freios");
+        freios.adicionar(new Peca("Pastilhas de freio", new BigDecimal("180.00"), 1));
+        freios.adicionar(new MaoDeObra("Substituição das pastilhas de freio", BigDecimal.ONE, new BigDecimal("120.00")));
+        pacote.adicionar(freios);
+
+        ItemComposto alinhamento = new ItemComposto("Alinhamento e balanceamento");
+        alinhamento.adicionar(new MaoDeObra("Alinhamento e balanceamento", BigDecimal.ONE, new BigDecimal("120.00")));
+        pacote.adicionar(alinhamento);
+
         ordem.adicionarItem(pacote);
         System.out.println("Pacote de revisão completa adicionado à ordem " + ordem.getNumero() + ".");
     }
@@ -245,6 +259,21 @@ public class Main {
             System.out.println("Nenhuma regra de orçamento escolhida. Use a opção 7 para calcular o total.");
         }
         System.out.println("=============================");
+    }
+
+    private void compararRegras() {
+        if (exigirOrdemAberta()) {
+            return;
+        }
+        List<RegraOrcamento> regras = List.of(new OrcamentoPadrao(), new OrcamentoFrota(), new OrcamentoGarantia());
+        System.out.println();
+        System.out.println("Comparação de regras — ordem " + ordem.getNumero() + ":");
+        for (RegraOrcamento regra : regras) {
+            String atual = ordem.temRegra() && ordem.getRegra().getClass() == regra.getClass()
+                    ? " (regra atual)" : "";
+            System.out.println("  " + regra.getDescricao() + atual + ": "
+                    + moeda.format(regra.calcular(ordem.getValorPecas(), ordem.getValorMaoDeObra())));
+        }
     }
 
     private static String limitarTexto(String texto, int tamanhoMaximo) {

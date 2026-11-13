@@ -29,6 +29,8 @@ A aplicação roda inteiramente em memória (sem banco de dados) e segue o fluxo
 7. **Listar ordens de serviço** — mostra todas as ordens abertas, com veículo, regra e total.
 8. **Selecionar ordem atual** — escolhe, pelo número (ex.: OS-001), em qual ordem os
    próximos itens e regras serão lançados.
+9. **Comparar as três regras de orçamento** — mostra o total da mesma ordem em Padrão,
+   Frota e Garantia, sem trocar a regra vigente.
 
 ## Tecnologias e pré-requisitos
 
@@ -61,6 +63,7 @@ Alternativa: abra o projeto no IntelliJ IDEA e execute a classe `Main`.
 8 - Exibir orçamento detalhado
 9 - Listar ordens de serviço
 10 - Selecionar ordem atual
+11 - Comparar regras de orçamento
 0 - Sair
 Opção: 1
 Placa (ABC1234 ou ABC1D23): ABC-1234
@@ -118,21 +121,32 @@ Veículo: Fiat Argo 2020 (placa ABC1234) — dono: Maria Souza
 Itens:
   - Peça: Pastilha de freio dianteira (2 x R$ 180,00) = R$ 360,00
   - Mão de obra: Reparo do freio (1,5 h x R$ 100,00) = R$ 150,00
-  + Pacote — Revisão completa (peças R$ 145,00 | mão de obra R$ 240,00)
-    - Peça: Óleo de motor e filtro (1 x R$ 145,00) = R$ 145,00
-    - Mão de obra: Troca de óleo e filtro (1 h x R$ 80,00) = R$ 80,00
-    - Mão de obra: Revisão do sistema de freios (1,5 h x R$ 60,00) = R$ 90,00
-    - Mão de obra: Verificação da suspensão (1 h x R$ 70,00) = R$ 70,00
+  + Pacote — Revisão completa (peças R$ 395,00 | mão de obra R$ 300,00)
+      + Troca de óleo (peças R$ 215,00 | mão de obra R$ 60,00)
+          - Peça: Óleo de motor (4 x R$ 45,00) = R$ 180,00
+          - Peça: Filtro de óleo (1 x R$ 35,00) = R$ 35,00
+          - Mão de obra: Troca de óleo (0,5 h x R$ 120,00) = R$ 60,00
+      + Freios (peças R$ 180,00 | mão de obra R$ 120,00)
+          - Peça: Pastilhas de freio (1 x R$ 180,00) = R$ 180,00
+          - Mão de obra: Substituição das pastilhas de freio (1 h x R$ 120,00) = R$ 120,00
+      + Alinhamento e balanceamento (peças R$ 0,00 | mão de obra R$ 120,00)
+          - Mão de obra: Alinhamento e balanceamento (1 h x R$ 120,00) = R$ 120,00
 
-Total de peças: R$ 505,00
-Total de mão de obra: R$ 390,00
+Total de peças: R$ 755,00
+Total de mão de obra: R$ 450,00
 Regra aplicada: Frota (10% de desconto na mão de obra)
-TOTAL: R$ 856,00
+TOTAL: R$ 1.160,00
 =============================
 
 Opção: 9
 Ordens de serviço:
-  OS-001 (atual) | Fiat Argo 2020 (placa ABC1234) — dono: Maria Souza | Frota (10% de desconto na mão de obra) | total: R$ 856,00
+  OS-001 (atual) | Fiat Argo 2020 (placa ABC1234) — dono: Maria Souza | Frota (10% de desconto na mão de obra) | total: R$ 1.160,00
+
+Opção: 11
+Comparação de regras — ordem OS-001:
+  Padrão (peças + mão de obra): R$ 1.205,00
+  Frota (10% de desconto na mão de obra) (regra atual): R$ 1.160,00
+  Garantia (apenas mão de obra): R$ 450,00
 ```
 
 Situações tratadas no cadastro de veículos:
@@ -159,12 +173,15 @@ Situações tratadas no cadastro de veículos:
   * Contexto: `model.OrdemServico` mantém a regra vigente (`definirRegra`) e delega
     o cálculo do total a ela (`calcularTotal`).
   * Ponto de troca em tempo de execução: opção 7 do menu (`Main.escolherRegra`).
+  * Comparação de regras: opção 11 do menu (`Main.compararRegras`) calcula o total da
+    mesma ordem com cada uma das três regras, sem trocar a regra vigente da ordem.
 
 ### Composite — itens da ordem de serviço
 
 * **Problema resolvido:** uma ordem contém itens individuais (peças, serviços) e pacotes
-  que agrupam outros itens (ex.: revisão completa). O padrão permite tratar item
-  simples e pacote de forma uniforme, totalizando peças e mão de obra de forma
+  que agrupam outros itens — inclusive outros pacotes, como a revisão completa, que
+  agrupa os sub-pacotes de troca de óleo, freios e alinhamento. O padrão permite tratar
+  item simples e pacote de forma uniforme, totalizando peças e mão de obra de forma
   recursiva sem que a ordem saiba a diferença entre eles.
 * **Classes envolvidas:**
   * `item.Item` (componente) — `getDescricao()`, `getValorPecas()`, `getValorMaoDeObra()` e `formatar()`.
