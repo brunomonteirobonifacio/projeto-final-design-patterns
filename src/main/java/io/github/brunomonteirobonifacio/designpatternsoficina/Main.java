@@ -3,6 +3,7 @@ package io.github.brunomonteirobonifacio.designpatternsoficina;
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.Item;
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.ItemComposto;
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.MaoDeObra;
+import io.github.brunomonteirobonifacio.designpatternsoficina.item.PacoteRevisaoEletrica;
 import io.github.brunomonteirobonifacio.designpatternsoficina.item.Peca;
 import io.github.brunomonteirobonifacio.designpatternsoficina.model.CadastroVeiculos;
 import io.github.brunomonteirobonifacio.designpatternsoficina.model.OrdemServico;
@@ -10,6 +11,7 @@ import io.github.brunomonteirobonifacio.designpatternsoficina.model.Veiculo;
 import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.OrcamentoFrota;
 import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.OrcamentoGarantia;
 import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.OrcamentoPadrao;
+import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.OrcamentoPrioritario;
 import io.github.brunomonteirobonifacio.designpatternsoficina.strategy.RegraOrcamento;
 
 import java.math.BigDecimal;
@@ -19,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Scanner;
+
+
 
 /**
  * Fluxo de ponta a ponta da oficina, via console:
@@ -56,6 +60,7 @@ public class Main {
                 case "9" -> listarOrdens();
                 case "10" -> selecionarOrdem();
                 case "11" -> compararRegras();
+                case "12" -> adicionarPacoteRevisaoEletrica();
                 case "0" -> executando = false;
                 default -> System.out.println("Opção inválida, tente novamente.");
             }
@@ -77,6 +82,7 @@ public class Main {
         System.out.println("9 - Listar ordens de serviço");
         System.out.println("10 - Selecionar ordem atual");
         System.out.println("11 - Comparar regras de orçamento");
+        System.out.println("12 - Adicionar pacote de revisão elétrica");
         System.out.println("0 - Sair");
         if (ordem != null) {
             System.out.println("Ordem atual: " + ordem.getNumero());
@@ -215,6 +221,14 @@ public class Main {
         System.out.println("Pacote de revisão completa adicionado à ordem " + ordem.getNumero() + ".");
     }
 
+    private void adicionarPacoteRevisaoEletrica() {
+        if (exigirOrdemAberta()) {
+            return;
+        }
+        ordem.adicionarItem(new PacoteRevisaoEletrica());
+        System.out.println("Pacote de revisão elétrica adicionado à ordem " + ordem.getNumero() + ".");
+    }
+
     private void escolherRegra() {
         if (exigirOrdemAberta()) {
             return;
@@ -223,10 +237,12 @@ public class Main {
         System.out.println("1 - Padrão: peças + mão de obra");
         System.out.println("2 - Frota: 10% de desconto na mão de obra");
         System.out.println("3 - Garantia: apenas mão de obra");
+        System.out.println("4 - Prioritário: acréscimo de 20% na mão de obra");
         RegraOrcamento regra = switch (lerTexto("Regra")) {
             case "1" -> new OrcamentoPadrao();
             case "2" -> new OrcamentoFrota();
             case "3" -> new OrcamentoGarantia();
+            case "4" -> new OrcamentoPrioritario();
             default -> null;
         };
         if (regra == null) {
@@ -265,7 +281,11 @@ public class Main {
         if (exigirOrdemAberta()) {
             return;
         }
-        List<RegraOrcamento> regras = List.of(new OrcamentoPadrao(), new OrcamentoFrota(), new OrcamentoGarantia());
+        List<RegraOrcamento> regras = List.of(
+                new OrcamentoPadrao(),
+                new OrcamentoFrota(),
+                new OrcamentoGarantia(),
+                new OrcamentoPrioritario());
         System.out.println();
         System.out.println("Comparação de regras — ordem " + ordem.getNumero() + ":");
         for (RegraOrcamento regra : regras) {

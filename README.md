@@ -2,7 +2,7 @@
 
 Sistema de console para uma oficina mecânica: cadastro de veículos, abertura de ordens de serviço,
 lançamento de itens (peças, serviços avulsos e pacotes de revisão) e cálculo do
-orçamento conforme a regra de cobrança aplicada (padrão, frota ou garantia).
+orçamento conforme a regra de cobrança aplicada (padrão, frota, garantia ou prioritária).
 
 ## Integrantes e contribuições
 
@@ -13,6 +13,14 @@ orçamento conforme a regra de cobrança aplicada (padrão, frota ou garantia).
 | Luís Filipe Damiani Colombo | Cadastro e listagem de veículos em memória (branch `feature/veiculos`): campo `dono` e validação/normalização de placa em `Veiculo`, classe `CadastroVeiculos` e opções de menu para cadastrar, listar e abrir a ordem a partir de um veículo cadastrado |
 | Roger Balcevicz | Pattern Composite completo (interface `Item`, `Peca`, `MaoDeObra`, `ItemComposto` e `Formatacao` — branch `feature/composite`, PR #1); listagem e seleção de ordens de serviço, validação de entradas e remoção da regra padrão da `OrdemServico` (branch `feature/ordem-servico`, PR #3) |
 
+### Contribuições da Parte 2
+
+- **Isabel Bastos — Composite:** Parte 2 (branch `feature/extensao`): análise das classes do Composite; criação e teste do pacote composto de revisão elétrica, com peças e serviços e cálculo dos valores.
+
+- **Sophia dos Santos — Strategy:** Parte 2 (branch `feature/extensao`): análise das regras existentes e criação da estratégia `OrcamentoPrioritario`, com acréscimo de 20% na mão de obra; verificação dos cálculos com itens e pacotes.
+
+- **Elias Cabreira Maciel — Integração e Pull Request:** Parte 2 (branch `feature/extensao`): criação do fork e da branch, organização do trabalho da equipe, integração das funcionalidades ao menu, testes manuais, atualização do README e preparação do Pull Request.
+
 ## Descrição do sistema
 
 A aplicação roda inteiramente em memória (sem banco de dados) e segue o fluxo:
@@ -22,15 +30,16 @@ A aplicação roda inteiramente em memória (sem banco de dados) e segue o fluxo
 2. **Listar veículos** — mostra todos os veículos cadastrados em memória.
 3. **Abrir ordem de serviço** — escolhe, pela placa, um veículo já cadastrado.
 4. **Lançar itens** — peças (quantidade × preço unitário), serviços de mão de obra
-   (horas × valor/hora) e o pacote de revisão completa, que agrupa vários itens.
-5. **Escolher a regra de orçamento** — Padrão, Frota ou Garantia. A ordem não tem regra
+   (horas × valor/hora), o pacote de revisão completa e o pacote de revisão elétrica.
+5. **Escolher a regra de orçamento** — Padrão, Frota, Garantia ou Prioritária, com acréscimo
+   de 20% na mão de obra. A ordem não tem regra
    padrão: o total só é calculado depois que uma regra é escolhida.
 6. **Exibir orçamento detalhado** — mostra a árvore de itens, os totais de peças e de mão de obra, a regra aplicada e o total final.
 7. **Listar ordens de serviço** — mostra todas as ordens abertas, com veículo, regra e total.
 8. **Selecionar ordem atual** — escolhe, pelo número (ex.: OS-001), em qual ordem os
    próximos itens e regras serão lançados.
-9. **Comparar as três regras de orçamento** — mostra o total da mesma ordem em Padrão,
-   Frota e Garantia, sem trocar a regra vigente.
+9. **Comparar as quatro regras de orçamento** — mostra o total da mesma ordem em Padrão,
+   Frota, Garantia e Prioritária, sem trocar a regra vigente.
 
 ## Tecnologias e pré-requisitos
 
@@ -64,6 +73,7 @@ Alternativa: abra o projeto no IntelliJ IDEA e execute a classe `Main`.
 9 - Listar ordens de serviço
 10 - Selecionar ordem atual
 11 - Comparar regras de orçamento
+12 - Adicionar pacote de revisão elétrica
 0 - Sair
 Opção: 1
 Placa (ABC1234 ou ABC1D23): ABC-1234
@@ -111,6 +121,7 @@ Regras disponíveis:
 1 - Padrão: peças + mão de obra
 2 - Frota: 10% de desconto na mão de obra
 3 - Garantia: apenas mão de obra
+4 - Prioritária: acréscimo de 20% na mão de obra
 Regra: 2
 Regra definida: Frota (10% de desconto na mão de obra)
 
@@ -147,6 +158,31 @@ Comparação de regras — ordem OS-001:
   Padrão (peças + mão de obra): R$ 1.205,00
   Frota (10% de desconto na mão de obra) (regra atual): R$ 1.160,00
   Garantia (apenas mão de obra): R$ 450,00
+  Prioritário (20% de acréscimo na mão de obra): R$ 1.295,00
+
+Opção: 12
+Pacote de revisão elétrica adicionado à ordem OS-001.
+
+- Exemplos utilizando a opção 12:
+Opção: 7
+Regras disponíveis:
+1 - Padrão: peças + mão de obra
+2 - Frota: 10% de desconto na mão de obra
+3 - Garantia: apenas mão de obra
+4 - Prioritária: acréscimo de 20% na mão de obra
+Regra: 4
+Regra definida: Prioritário (20% de acréscimo na mão de obra)
+
+Opção: 8
+  + Pacote — Revisão elétrica (peças R$ 65,00 | mão de obra R$ 180,00)
+      - Mão de obra: Diagnóstico elétrico (0,5 h x R$ 120,00) = R$ 60,00
+      + Substituição de componentes (peças R$ 65,00 | mão de obra R$ 120,00)
+          - Peça: Fusível (2 x R$ 10,00) = R$ 20,00
+          - Peça: Relé (1 x R$ 45,00) = R$ 45,00
+          - Mão de obra: Substituição de componentes elétricos (1 h x R$ 120,00) = R$ 120,00
+Total de peças: R$ 820,00
+Total de mão de obra: R$ 630,00
+TOTAL prioritário: R$ 1.576,00
 ```
 
 Situações tratadas no cadastro de veículos:
@@ -156,6 +192,29 @@ Situações tratadas no cadastro de veículos:
 * a placa é conferida logo depois de digitada, antes de pedir os demais campos.
 * ano fora do intervalo (1900 até o ano seguinte ao atual) é avisado logo depois de digitado e pedido de novo; campos vazios também são pedidos de novo.
 * abrir ordem sem veículos cadastrados ou com placa inexistente → mensagem orientando a usar as opções 1 ou 2.
+
+## Como testar a extensão
+
+1. Inicie a aplicação conforme a seção **Como executar**.
+2. Tente adicionar o pacote de revisão elétrica antes de abrir uma ordem. O sistema deve informar que nenhuma ordem está aberta.
+3. Cadastre um veículo e abra uma ordem de serviço para ele.
+4. Adicione o pacote de revisão elétrica pela opção **12**.
+5. Escolha a regra **Prioritária** pela opção **7** e, em seguida, selecione **4**.
+6. Exiba o orçamento pela opção **8**. O pacote deve apresentar:
+   - Peças: **R$ 65,00**
+   - Mão de obra: **R$ 180,00**
+   - Total prioritário: **R$ 281,00**
+7. Compare as regras pela opção **11**. Para uma ordem contendo somente esse pacote, os totais esperados são:
+
+| Regra | Total esperado |
+|---|---:|
+| Padrão | R$ 245,00 |
+| Frota | R$ 227,00 |
+| Garantia | R$ 180,00 |
+| Prioritária | R$ 281,00 |
+
+A comparação deve identificar a regra prioritária como atual, sem alterar a regra selecionada na ordem.
+
 
 ## Patterns utilizados
 
@@ -170,11 +229,12 @@ Situações tratadas no cadastro de veículos:
   * `strategy.OrcamentoPadrao` — peças + mão de obra.
   * `strategy.OrcamentoFrota` — peças + 90% da mão de obra.
   * `strategy.OrcamentoGarantia` — apenas a mão de obra.
+  * `strategy.OrcamentoPrioritario` — peças + 120% da mão de obra.
   * Contexto: `model.OrdemServico` mantém a regra vigente (`definirRegra`) e delega
     o cálculo do total a ela (`calcularTotal`).
   * Ponto de troca em tempo de execução: opção 7 do menu (`Main.escolherRegra`).
   * Comparação de regras: opção 11 do menu (`Main.compararRegras`) calcula o total da
-    mesma ordem com cada uma das três regras, sem trocar a regra vigente da ordem.
+    mesma ordem com cada uma das quatro regras, sem trocar a regra vigente da ordem.
 
 ### Composite — itens da ordem de serviço
 
@@ -189,6 +249,10 @@ Situações tratadas no cadastro de veículos:
   * `item.MaoDeObra` (folha) — horas × valor/hora, compõe o total de mão de obra.
   * `item.ItemComposto` (composto) — agrupa filhos e soma seus valores
     recursivamente; `formatar()` exibe a árvore de itens com recuo.
+  * `item.PacoteRevisaoEletrica` — pacote composto com diagnóstico elétrico e
+    substituição de componentes; inclui fusíveis, relé e mão de obra, totalizando
+    R$ 65,00 em peças e R$ 180,00 em mão de obra.
+  * Opção 12 do menu adiciona esse pacote à ordem atual.
   * `item.Formatacao` (auxiliar) — formatação de moeda (R$) e horas.
   * `model.OrdemServico` mantém os itens numa `List<Item>` e os manipula sempre
     pela interface, como cliente do composite.
@@ -204,5 +268,3 @@ Situações tratadas no cadastro de veículos:
   placa em `Veiculo`, opções 1–3 do menu em `Main`, resolução do conflito do `Main` com a
   branch `feature/ordem-servico` e atualização deste README (fluxo, exemplo de uso e contribuições).
 * Todo o código gerado com auxílio de IA foi **revisado e ajustado pelos integrantes**.
-
-*(A Parte 2 deve ser desenvolvida sem uso de IA; a Parte 3 é autoral.)*
