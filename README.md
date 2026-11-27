@@ -10,7 +10,7 @@ orçamento conforme a regra de cobrança aplicada (padrão, frota ou garantia).
 |---|---|
 | Bruno Monteiro Bonifácio | Estrutura inicial do repositório (pom.xml, .gitignore, entrypoint `Main`), organização do README e revisão de PRs |
 | Gianluca Andrade Silvestre | Parte 1 (branch `feature/strategy-orcamento`): entidades `Veiculo` e `OrdemServico`, regras de orçamento do Strategy e fluxo de console de ponta a ponta |
-| Luís Filipe Damiani Colombo | Cadastro e listagem de veículos em memória (branch `feature/veiculos`): campo `dono` e validação/normalização de placa em `Veiculo`, classe `CadastroVeiculos` e opções de menu para cadastrar, listar e abrir a ordem a partir de um veículo cadastrado |
+| Luis Filipe Damiani Colombo | Cadastro e listagem de veículos em memória (branch `feature/veiculos`): campo `dono` e validação/normalização de placa em `Veiculo`, classe `CadastroVeiculos` e opções de menu para cadastrar, listar e abrir a ordem a partir de um veículo cadastrado |
 | Roger Balcevicz | Pattern Composite completo (interface `Item`, `Peca`, `MaoDeObra`, `ItemComposto` e `Formatacao` — branch `feature/composite`, PR #1); listagem e seleção de ordens de serviço, validação de entradas e remoção da regra padrão da `OrdemServico` (branch `feature/ordem-servico`, PR #3) |
 
 ## Descrição do sistema
@@ -23,8 +23,11 @@ A aplicação roda inteiramente em memória (sem banco de dados) e segue o fluxo
 3. **Abrir ordem de serviço** — escolhe, pela placa, um veículo já cadastrado.
 4. **Lançar itens** — peças (quantidade × preço unitário), serviços de mão de obra
    (horas × valor/hora) e o pacote de revisão completa, que agrupa vários itens.
-5. **Escolher a regra de orçamento** — Padrão, Frota ou Garantia. A ordem não tem regra
-   padrão: o total só é calculado depois que uma regra é escolhida.
+5. **Escolher a regra de orçamento** — 
+*Padrão*(valor mão de obra + valor peças), 
+*Frota*(aplica 10% de desconto para o valor de mão de obra + o valor das peças integralmente) 
+ou *Garantia*(somente o valor de mão de obra). 
+A ordem não tem regra padrão: o total só é calculado depois que uma regra é escolhida.
 6. **Exibir orçamento detalhado** — mostra a árvore de itens, os totais de peças e de mão de obra, a regra aplicada e o total final.
 7. **Listar ordens de serviço** — mostra todas as ordens abertas, com veículo, regra e total.
 8. **Selecionar ordem atual** — escolhe, pelo número (ex.: OS-001), em qual ordem os
