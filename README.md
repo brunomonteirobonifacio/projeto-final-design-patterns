@@ -13,11 +13,13 @@ orçamento conforme a regra de cobrança aplicada (padrão, frota, garantia ou p
 | Luís Filipe Damiani Colombo | Cadastro e listagem de veículos em memória (branch `feature/veiculos`): campo `dono` e validação/normalização de placa em `Veiculo`, classe `CadastroVeiculos` e opções de menu para cadastrar, listar e abrir a ordem a partir de um veículo cadastrado |
 | Roger Balcevicz | Pattern Composite completo (interface `Item`, `Peca`, `MaoDeObra`, `ItemComposto` e `Formatacao` — branch `feature/composite`, PR #1); listagem e seleção de ordens de serviço, validação de entradas e remoção da regra padrão da `OrdemServico` (branch `feature/ordem-servico`, PR #3) |
 
-EXTENSÃO:
+### Contribuições da Parte 2
 
-| Isabel Bastos | Parte 2 (branch `feature/extensao`): pacote de revisão elétrica com Composite e teste próprio de valores e formatação (classe executável) |
-| Sophia dos Santos | Parte 2 (branch `feature/extensao`): regra Strategy de orçamento prioritário, com acréscimo de 20% na mão de obra |
-| Elias Cabreira Maciel | Parte 2 (branch `feature/extensao`): integração das novas funcionalidades ao fluxo da aplicação, atualização da documentação e preparação do Pull Request |
+- **Isabel Bastos — Composite:** Parte 2 (branch `feature/extensao`): análise das classes do Composite; criação e teste do pacote composto de revisão elétrica, com peças e serviços e cálculo dos valores.
+
+- **Sophia dos Santos — Strategy:** Parte 2 (branch `feature/extensao`): análise das regras existentes e criação da estratégia `OrcamentoPrioritario`, com acréscimo de 20% na mão de obra; verificação dos cálculos com itens e pacotes.
+
+- **Elias Cabreira Maciel — Integração e Pull Request:** Parte 2 (branch `feature/extensao`): criação do fork e da branch, organização do trabalho da equipe, integração das funcionalidades ao menu, testes manuais, atualização do README e preparação do Pull Request.
 
 ## Descrição do sistema
 
